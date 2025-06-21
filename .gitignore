@@ -1,4 +1,4 @@
 /target
 Cargo.lock
 # Main.rs is used for a simple testing. Ignore it for now.
-./src/main.rs
+/src/main.rs

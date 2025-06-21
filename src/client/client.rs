@@ -1,8 +1,9 @@
 use crate::client::invoice::InvoicesEndpoint;
 use reqwest::Url;
 
+// Represents the client for the Fakturownia API.
 pub struct Client {
-    api_base: Url,
+    pub api_base: Url,
     api_key: String,
     pub client: reqwest::Client,
 }

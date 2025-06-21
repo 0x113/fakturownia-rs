@@ -106,6 +106,58 @@ pub struct Position {
 }
 
 #[derive(Debug, Deserialize)]
+pub enum Kind {
+    #[serde(rename = "vat")]
+    Vat,
+    #[serde(rename = "proforma")]
+    Proforma,
+    #[serde(rename = "bill")]
+    Bill,
+    #[serde(rename = "receipt")]
+    Receipt,
+    #[serde(rename = "advance")]
+    Advance,
+    #[serde(rename = "final")]
+    Final,
+    #[serde(rename = "correction")]
+    Correction,
+    #[serde(rename = "vat_mp")]
+    VatMp,
+    #[serde(rename = "vat_rr")]
+    VatRr,
+    #[serde(rename = "invoice_other")]
+    Other,
+    #[serde(rename = "vat_margin")]
+    VatMargin,
+    #[serde(rename = "kp")]
+    Kp,
+    #[serde(rename = "kw")]
+    Kw,
+    #[serde(rename = "dw")]
+    Dw,
+    #[serde(rename = "wnt")]
+    Wnt,
+    #[serde(rename = "wdt")]
+    Wdt,
+    #[serde(rename = "estimate")]
+    Estimate,
+    #[serde(rename = "correction_note")]
+    CorrectionNote,
+    #[serde(rename = "accounting_note")]
+    AccountingNote,
+    #[serde(rename = "client_order")]
+    ClientOrder,
+    #[serde(rename = "import_service")]
+    ImportService,
+    #[serde(rename = "import_service_eu")]
+    ImportServiceEu,
+    #[serde(rename = "import_products")]
+    ImportProducts,
+    #[serde(rename = "export_products")]
+    ExportProducts,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Invoice {
     pub id: u64,
     pub number: String,
@@ -114,4 +166,6 @@ pub struct Invoice {
     #[serde(flatten)]
     pub buyer: Buyer,
     pub positions: Option<Vec<Position>>,
+    pub kind: Option<Kind>,
+    pub token: String,
 }
