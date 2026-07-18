@@ -1,6 +1,9 @@
 use super::client::Client;
 use crate::types::Invoice;
 use reqwest::Error;
+use serde_json::json;
+
+use std::collections::HashMap;
 
 // Represents the options for listing invoices.
 pub struct ListInvoicesOptions {
@@ -90,5 +93,17 @@ impl<'c> InvoicesEndpoint<'c> {
         let invoice = self.get_invoice(id).await?;
         let url = format!("{}invoice/{}.pdf", self.0.api_base, invoice.token);
         Ok(url)
+    }
+
+    // Cancels the invoice with the given ID and reason (if provided).
+    pub async fn cancel_invoice(&self, id: u64, reason: Option<&str>) -> Result<(), Error> {
+        let mut body = json!({
+            "cancel_invoice_id": id,
+        });
+        if let Some(reason) = reason {
+            body["reason"] = json!(reason);
+        }
+        let _ = self.0.post("invoices/cancel", body).await?;
+        Ok(())
     }
 }
