@@ -1,5 +1,6 @@
 use crate::client::invoice::InvoicesEndpoint;
-use reqwest::Url;
+use reqwest::{Method, Url};
+use serde::Serialize;
 use serde_json::json;
 
 // Represents the client for the Fakturownia API.
@@ -65,18 +66,33 @@ impl Client {
         path: &str,
         mut body: serde_json::Value,
     ) -> Result<reqwest::Response, reqwest::Error> {
-        let url = self.build_url_for_post_request(path);
-
-        // Add api_token to the body
         body["api_token"] = json!(self.api_key);
-        let response = self
-            .client
-            .post(url)
-            .json(&body)
+        self.json_request(Method::POST, path, &body).await
+    }
+
+    pub(crate) async fn authenticated_json_request<T: Serialize + ?Sized>(
+        &self,
+        method: Method,
+        path: &str,
+        body: &T,
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        let mut body = serde_json::to_value(body).expect("request payload must serialize");
+        body["api_token"] = json!(self.api_key);
+        self.json_request(method, path, &body).await
+    }
+
+    async fn json_request<T: Serialize + ?Sized>(
+        &self,
+        method: Method,
+        path: &str,
+        body: &T,
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        self.client
+            .request(method, self.build_url_for_post_request(path))
+            .json(body)
             .send()
             .await?
-            .error_for_status()?;
-        Ok(response)
+            .error_for_status()
     }
 
     pub fn invoices(&self) -> InvoicesEndpoint<'_> {
