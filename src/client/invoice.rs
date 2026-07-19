@@ -3,8 +3,6 @@ use crate::types::Invoice;
 use reqwest::Error;
 use serde_json::json;
 
-use std::collections::HashMap;
-
 // Represents the options for listing invoices.
 pub struct ListInvoicesOptions {
     pub page: Option<u32>,
@@ -66,7 +64,7 @@ impl<'c> InvoicesEndpoint<'c> {
                 url.query_pairs_mut().append_pair("period", period.as_str());
             }
         }
-        let response = self.0.client.get(url).send().await?;
+        let response = self.0.client.get(url).send().await?.error_for_status()?;
         let invoices: Vec<Invoice> = response.json().await?;
         Ok(invoices)
     }
@@ -74,7 +72,7 @@ impl<'c> InvoicesEndpoint<'c> {
     // Returns the invoice details based on the invoice ID.
     pub async fn get_invoice(&self, id: u64) -> Result<Invoice, Error> {
         let url = self.0.build_url(&format!("invoices/{}", id));
-        let response = self.0.client.get(url).send().await?;
+        let response = self.0.client.get(url).send().await?.error_for_status()?;
         let invoice: Invoice = response.json().await?;
         Ok(invoice)
     }
@@ -101,7 +99,7 @@ impl<'c> InvoicesEndpoint<'c> {
             "cancel_invoice_id": id,
         });
         if let Some(reason) = reason {
-            body["reason"] = json!(reason);
+            body["cancel_reason"] = json!(reason);
         }
         let _ = self.0.post("invoices/cancel", body).await?;
         Ok(())

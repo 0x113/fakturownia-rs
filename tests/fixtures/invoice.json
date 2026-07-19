@@ -1,0 +1,22 @@
+{
+  "id": 123,
+  "number": "FV/1/2026",
+  "kind": "vat",
+  "token": "invoice-preview-token",
+  "seller_name": "Example Seller",
+  "seller_tax_no": "1111111111",
+  "seller_street": "Seller Street 1",
+  "seller_post_code": "00-001",
+  "seller_city": "Warsaw",
+  "seller_country": "PL",
+  "seller_email": "seller@example.com",
+  "seller_phone": "123456789",
+  "seller_fax": "",
+  "seller_www": "https://seller.example.com",
+  "seller_person": "Jane Seller",
+  "seller_bank": "Example Bank",
+  "seller_bank_account": null,
+  "buyer_name": "Example Buyer",
+  "buyer_tax_no": "2222222222",
+  "positions": null
+}

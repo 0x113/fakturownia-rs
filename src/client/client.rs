@@ -12,6 +12,11 @@ pub struct Client {
 impl Client {
     pub fn new(domain: String, api_key: String) -> Result<Client, Box<dyn std::error::Error>> {
         let api_base = Url::parse(format!("https://{}.fakturownia.pl", domain).as_str())?;
+
+        Ok(Self::with_base_url(api_base, api_key)?)
+    }
+
+    pub fn with_base_url(api_base: Url, api_key: String) -> Result<Client, reqwest::Error> {
         let client = reqwest::Client::builder().build()?;
 
         Ok(Client {
@@ -64,11 +69,52 @@ impl Client {
 
         // Add api_token to the body
         body["api_token"] = json!(self.api_key);
-        let response = self.client.post(url).json(&body).send().await?;
+        let response = self
+            .client
+            .post(url)
+            .json(&body)
+            .send()
+            .await?
+            .error_for_status()?;
         Ok(response)
     }
 
     pub fn invoices(&self) -> InvoicesEndpoint<'_> {
         InvoicesEndpoint(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn client() -> Client {
+        Client::with_base_url(
+            Url::parse("http://localhost:3000").unwrap(),
+            "test-token".to_owned(),
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn build_url_adds_json_suffix_and_api_token() {
+        let url = client().build_url("invoices/123");
+
+        assert_eq!(url.path(), "/invoices/123.json");
+        assert_eq!(url.query(), Some("api_token=test-token"));
+    }
+
+    #[test]
+    fn build_url_does_not_duplicate_json_suffix() {
+        let url = client().build_url("invoices.json");
+
+        assert_eq!(url.path(), "/invoices.json");
+    }
+
+    #[test]
+    fn post_url_omits_api_token_from_query() {
+        let url = client().build_url_for_post_request("invoices/cancel");
+
+        assert_eq!(url.as_str(), "http://localhost:3000/invoices/cancel.json");
     }
 }

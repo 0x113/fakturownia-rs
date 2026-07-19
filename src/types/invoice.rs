@@ -169,3 +169,58 @@ pub struct Invoice {
     pub kind: Option<Kind>,
     pub token: String,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserializes_invoice_with_flattened_parties() {
+        let invoice: Invoice =
+            serde_json::from_str(include_str!("../../tests/fixtures/invoice.json")).unwrap();
+
+        assert_eq!(invoice.id, 123);
+        assert_eq!(invoice.seller.name, "Example Seller");
+        assert_eq!(invoice.buyer.name, "Example Buyer");
+        assert!(matches!(invoice.kind, Some(Kind::Vat)));
+        assert!(invoice.positions.is_none());
+    }
+
+    #[test]
+    fn deserializes_every_supported_invoice_kind() {
+        let cases = [
+            ("vat", Kind::Vat),
+            ("proforma", Kind::Proforma),
+            ("bill", Kind::Bill),
+            ("receipt", Kind::Receipt),
+            ("advance", Kind::Advance),
+            ("final", Kind::Final),
+            ("correction", Kind::Correction),
+            ("vat_mp", Kind::VatMp),
+            ("vat_rr", Kind::VatRr),
+            ("invoice_other", Kind::Other),
+            ("vat_margin", Kind::VatMargin),
+            ("kp", Kind::Kp),
+            ("kw", Kind::Kw),
+            ("dw", Kind::Dw),
+            ("wnt", Kind::Wnt),
+            ("wdt", Kind::Wdt),
+            ("estimate", Kind::Estimate),
+            ("correction_note", Kind::CorrectionNote),
+            ("accounting_note", Kind::AccountingNote),
+            ("client_order", Kind::ClientOrder),
+            ("import_service", Kind::ImportService),
+            ("import_service_eu", Kind::ImportServiceEu),
+            ("import_products", Kind::ImportProducts),
+            ("export_products", Kind::ExportProducts),
+        ];
+
+        for (serialized, expected) in cases {
+            let kind: Kind = serde_json::from_str(&format!("\"{serialized}\"")).unwrap();
+            assert_eq!(
+                std::mem::discriminant(&kind),
+                std::mem::discriminant(&expected)
+            );
+        }
+    }
+}
